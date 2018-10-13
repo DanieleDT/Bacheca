@@ -1,0 +1,5 @@
+list
+login :username :password
+send :struct messaggio
+delete :id 
+register :username :password
