@@ -126,14 +126,16 @@ char login(char* username, int password){
 	return result;
 }
 
-/*int hash_code(char* string){
+/*
+int hash_code(char* string){
 	//simple hash function for protected passwords
 	int hash = 0;
 	for(int i = 0; i < strlen(string); i++){
 		hash = 31 * hash +  string[i];
 	}
 	return hash;
-}*/
+}
+*/
 
 char insert_announcement(char* user, char* title, char* text){
 	//return values: 1 insert successfull, 0 user non existing
@@ -251,6 +253,49 @@ struct node* list(){
 		printf("Testo: %s\n", head-> announce->text);
 		printf("Utente: %s\n", head-> announce->user);
 		*/
+	}
+	return head;
+}
+
+struct node* mylist(char* username){
+	sqlite3* connection = get_connection();
+	char* sql_list = NULL;
+	sqlite3_stmt *stmt;
+	asprintf(&sql_list, "select title, text, id from announcements where user = '%s'", username);
+
+	if(sqlite3_prepare_v2(connection, sql_list, -1, &stmt, NULL)!= SQLITE_OK){
+		printf("%s\n", "Error in sqlite3_prepare_v2");
+		exit(0);
+	}
+
+	struct node* head = NULL;
+	
+	while(sqlite3_step(stmt) == SQLITE_ROW){
+		struct node* new_node = malloc(sizeof(struct node));
+		struct announce* announce = malloc(sizeof(struct announce));
+		if(new_node == NULL || announce == NULL){
+			printf("%s\n", "Error in malloc");
+		}
+		//ID
+		announce->id = sqlite3_column_int(stmt, 2);
+		//Title
+		strcpy(announce->title, sqlite3_column_text(stmt, 0));
+		//Text
+		strcpy(announce->text, sqlite3_column_text(stmt, 1));
+		//User
+		strcpy(announce->user, username);
+		
+		new_node -> announce = announce;
+		new_node -> next = head;
+		head = new_node;
+
+		/*
+		printf("ID: %d\n", head -> announce-> id);
+		printf("Titolo: %s\n", head -> announce->title);
+		printf("Testo: %s\n", head-> announce->text);
+		printf("Utente: %s\n", head-> announce->user);
+		*/
+		
 	}
 	return head;
 }

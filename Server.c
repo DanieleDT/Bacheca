@@ -127,15 +127,14 @@ void *thread_job(void *param){
 					}
 				}
 			}else if(strcmp("post", args[0]) == 0){
+				char result = -1;
 				//sends client: 1 success, 0 failure, -1 not logged in
 				if(loggedin == 1){
-					if(insert_announcement(args[1], args[2], args[3]) == 1){
-						printf("%s\n", "Annuncio inserito");
-					}else{
-						printf("%s\n", "Annuncio non inserito");
-					}
-				}else{
-					printf("%s\n", "Login non effettuato");
+					result = (char)insert_announcement(args[1], args[2], args[3]);
+				}
+				if(send(job_socket, &result, sizeof(char), 0) == -1){
+					printf("%s\n", "Error in send");
+					exit(0);
 				}
 			}else if(strcmp("list", args[0]) == 0){
 				struct node* head = list();
@@ -153,12 +152,49 @@ void *thread_job(void *param){
 				}
 				free(head);
 				struct announce* end = malloc(sizeof(struct announce));
+				if(end == NULL){
+					printf("%s\n", "Error in malloc");
+					exit(0);
+				}
 				end -> id = -1;
 				if(send(job_socket, end, sizeof(struct announce), 0) == -1){
 					printf("%s\n", "Error in send");
 					exit(0);
 				}
 				free(end);
+			}else if(strcmp("mylist", args[0]) == 0){
+				if(loggedin == 1){
+					if(strcmp(user, args[1]) == 0){
+						struct node* head = mylist(args[1]);
+						while(head != NULL){
+							struct announce* announce = head-> announce;
+
+							if(send(job_socket, (head->announce), sizeof(struct announce), 0) == -1){
+								printf("%s\n", "Error in send");
+								exit(0);
+							}
+							struct node* old_head = head;
+							head = head -> next;
+							free(old_head);
+						}
+						free(head);
+						struct announce* end = malloc(sizeof(struct announce));
+						if(end == NULL){
+							printf("%s\n", "Error in malloc");
+							exit(0);
+						}
+						end -> id = -1;
+						if(send(job_socket, end, sizeof(struct announce), 0) == -1){
+							printf("%s\n", "Error in send");
+							exit(0);
+						}
+						free(end);
+					}else{
+						printf("%s\n", "Users not mathing");
+					}
+				}else{
+					printf("%s\n", "Not logged in");
+				}
 			}else if(strcmp(args[0], "delete") == 0){
 				//printf("%s", "DELETE ");
 				char* rest;

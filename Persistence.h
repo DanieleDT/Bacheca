@@ -27,4 +27,6 @@ void init_database();
 
 struct node* list();
 
+struct node* mylist(char* username);
+
 #endif

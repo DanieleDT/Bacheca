@@ -19,6 +19,14 @@
 
 #define fflush(stdin) while(getchar() != '\n')
 
+int hash_code(char* string){
+	//simple hash function for protected passwords
+	int hash = 0;
+	for(int i = 0; i < strlen(string); i++){
+		hash = 31 * hash +  string[i];
+	}
+	return hash;
+}
 
 int main(int argc, char* argv[]){
 	struct sockaddr_in server;
@@ -146,6 +154,10 @@ int main(int argc, char* argv[]){
 				exit(0);
 			}
 			struct announce* announce = malloc(sizeof(struct announce));
+			if(announce == NULL){
+				printf("%s\n","Error in malloc");
+				exit(0);
+			}
 			long int count = 0;
 			while(1){
 				if(recv(socket_server, announce, sizeof(struct announce), 0) == 0){
@@ -180,9 +192,21 @@ int main(int argc, char* argv[]){
 				char msg[3*MAXLINE];
 				sprintf((char*)&msg, "post %s %s %s", user, title, text);
 				if(send(socket_server, &msg, sizeof(msg), 0) == -1){
-						printf("%s\n", "Error in send");
-						exit(0);
-					}
+					printf("%s\n", "Error in send");
+					exit(0);
+				}
+				char result;
+				if(recv(socket_server, &result, sizeof(char), 0) == 0){
+					printf("%s\n", "Server offline");
+					exit(0);
+				}
+				if(result == 1){
+					printf("%s\n", "Annuncio pubblicato con successo");
+				}else if(result == 0){
+					printf("%s\n", "Annuncio non pubblicato");
+				}else{
+					printf("%s\n", "Errore di sincronizzazione con il server, provare a rilanciare il programa");
+				}
 			}else{
 				printf("%s\n", "Devi effettuare il login prima di poter utilizzare questa funzione");
 			}
@@ -223,6 +247,44 @@ int main(int argc, char* argv[]){
 
 				}else{
 					printf("ID inserito non valido\n");
+				}
+			}else{
+				printf("%s\n", "Devi effettuare il login prima di poter utilizzare questa funzione");
+			}
+		}else if(strcmp("mylist", command) == 0){
+			if(login == 1){
+				//mylist(user);
+				char msg[1024];
+				sprintf((char*)&msg, "mylist %s", user);
+				if(send(socket_server, &msg, sizeof(msg), 0) == -1){
+					printf("%s\n", "Error in send");
+					exit(0);
+				}
+				struct announce* announce = malloc(sizeof(struct announce));
+				if(announce == NULL){
+					printf("%s\n", "Error in malloc");
+					exit(0);
+				}
+				long int count = 0;
+				while(1){
+					if(recv(socket_server, announce, sizeof(struct announce), 0) == 0){
+						printf("%s\n", "Error in recv");
+						exit(0);
+					}
+					if(announce-> id == -1){
+						break;
+					}
+					count++;
+					printf("\nID: %d\n", announce-> id);
+					printf("Titolo: %s\n", announce->title);
+					printf("Testo: %s\n", announce->text);
+					//printf("Utente: %s\n", announce->user);
+				}
+				free(announce);
+				if(count){
+					printf("\n%ld annunci pubblicati\n", count);
+				}else{
+					printf("%s\n", "Nessun annuncio pubblicato");
 				}
 			}else{
 				printf("%s\n", "Devi effettuare il login prima di poter utilizzare questa funzione");
