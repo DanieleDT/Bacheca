@@ -1,10 +1,10 @@
 #include <stdio.h>
+#include <stdlib.h>
 
 void main(){
-	char buf[21];
-	scanf("%20s", buf);
-	printf("%s\n", buf);
-	char buf2[21];
-	scanf("%20s", buf2);
-	printf("%s\n", buf2);
+	char *s;
+	while(scanf("%m[^\n]", &s)){
+		printf("%s\n", s);
+	}
+	free(s);
 }

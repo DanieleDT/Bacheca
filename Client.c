@@ -51,7 +51,7 @@ int main(int argc, char* argv[]){
 	}
 	printf("%s\n", "Benvenuto nella Bacheca");
 	printf("\n%s\n", "Scrivi 'help' per conoscere i comandi a disposizione");
-	char user[1024];
+	char *user = NULL;
 	char login = 0;
 	while(1){
 		printf("%s", "\nInserisci un comando: ");
@@ -303,4 +303,5 @@ int main(int argc, char* argv[]){
 		//memset(command, 0, MAXLINE);
 		//printf("dopo send\n");
 	}
+	free(user);
 }
