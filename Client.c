@@ -11,7 +11,6 @@
 #include <limits.h>
 
 #include "Persistence.h"
-#include "Utility.h"
 
 #define MAXLINE 1024
 #define IP "127.0.0.1"
@@ -56,24 +55,33 @@ int main(int argc, char* argv[]){
 	char login = 0;
 	while(1){
 		printf("%s", "\nInserisci un comando: ");
-		char command[MAXLINE];
+		char command[10];
 		scanf("%[^\n]", command);
-		//printf("command: %s\n", command);
 		fflush(stdin);
 		if(strcmp("help", command) == 0){
-			printf("%s\n", "\nComandi:\n\n- help\n\n- login\n\n- register\n\n- list\n\n- delete\n\n- post\n\n- exit");
+			printf("%s\n", "\nComandi:\n\n- help\n\n- login\n\n- register\n\n- list\n\n- mylist\n\n- delete\n\n- post\n\n- exit");
 		}else if(strcmp("login", command) == 0){
 			if(login == 0){
 				char username[MAXLINE];
 				char password[MAXLINE];
 				char msg[3*MAXLINE];
 
-				printf("%s\n", "Inserisci il tuo username:");
+				printf("%s", "Inserisci il tuo username: ");
 				scanf("%[^\n]", username);
 				fflush(stdin);
+				if(strlen(username) < 4){
+					printf("%s\n", "L'username deve contenere almeno 6 caratteri");
+					continue;
+				}
 				printf("%s\n", "Inserisci la password:");
+				system("stty -echo");
 				scanf("%[^\n]", password);
 				fflush(stdin);
+				system("stty echo");
+				if(strlen(password) < 4){
+					printf("%s\n", "La password deve contenere almeno 6 caratteri");
+					continue;
+				}
 				int hash = hash_code(password);
 				//int hash2 = hash_code("a");
 				//printf("hash: %d | hash2: %d\n", hash, hash2);
